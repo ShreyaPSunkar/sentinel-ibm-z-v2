@@ -33,8 +33,9 @@ class TestOrchestrator(unittest.TestCase):
 
         self.assertFalse(result["is_anomaly"])
         self.assertEqual(result["severity"], "LOW")
-        self.assertIn("deviated_metrics", result)
-        self.assertIn("correlation_detected", result)
+        self.assertEqual(result["deviated_metrics"], [])
+        self.assertFalse(result["correlation_detected"])
+        self.assertIn("flagged_metrics", result)
 
     def test_extreme_cpu_spike_is_classified(self):
         event = make_event(
@@ -44,6 +45,8 @@ class TestOrchestrator(unittest.TestCase):
         result = process_event(event, self.detector)
 
         self.assertTrue(result["is_anomaly"])
+        self.assertIn("cpu_pct", result["flagged_metrics"])
+        self.assertEqual(result["deviated_metrics"], result["flagged_metrics"])
         self.assertIn(
             result["severity"], {"MEDIUM", "HIGH", "CRITICAL"}
         )
@@ -60,6 +63,9 @@ class TestOrchestrator(unittest.TestCase):
         self.assertEqual(result["event_id"], event["event_id"])
         self.assertEqual(result["system_id"], event["system_id"])
         self.assertEqual(result["metrics"], event["metrics"])
+        self.assertEqual(
+            result["injected_anomaly"], event["injected_anomaly"]
+        )
 
 
 if __name__ == "__main__":
