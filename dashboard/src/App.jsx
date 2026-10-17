@@ -48,9 +48,13 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+ useEffect(() => {
+  loadData();
+  const interval = setInterval(() => {
+    loadData(backendUrl);
+  }, 3000);
+  return () => clearInterval(interval);
+}, [backendUrl]);
 
   // Filtered dataset
   const filteredIncidents = useMemo(() => {
